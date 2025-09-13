@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.db.models import Q
 
 from .models import Student, School, Application
@@ -15,7 +15,41 @@ class ApplicationAdmin(admin.ModelAdmin):
     list_display = ("student", "school", "application_date", "status")
     list_filter = ("status", "application_date")
     search_fields = ("student__first_name", "student__last_name", "school__name")
+    actions = ["make_accepted", "make_rejected"]
 
+    @admin.action(description='Mark selected applications as accepted')
+    def make_accepted(self, request, queryset):
+        not_updated = queryset.exclude(status='pending').count()
+        updated = queryset.filter(status='pending').update(status='accepted')
+        if updated:
+            self.message_user(
+                request,
+                f"{updated} application(s) marked as accepted.",
+                messages.SUCCESS
+            )
+        if not_updated:
+            self.message_user(
+                request,
+                f"{not_updated} application(s) were not pending and thus not updated.",
+                messages.WARNING
+            )
+
+    @admin.action(description='Mark selected applications as rejected')
+    def make_rejected(self, request, queryset):
+        not_updated = queryset.exclude(status='pending').count()
+        updated = queryset.filter(status='pending').update(status='rejected')
+        if updated:
+            self.message_user(
+                request,
+                f"{updated} application(s) marked as rejected.",
+                messages.SUCCESS
+            )
+        if not_updated:
+            self.message_user(
+                request,
+                f"{not_updated} application(s) were not pending and thus not updated.",
+                messages.WARNING
+            )
 
 class AgeFilter(admin.SimpleListFilter):
     title = 'age'
