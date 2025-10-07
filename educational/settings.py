@@ -160,3 +160,7 @@ CELERY_WORKER_CONCURRENCY = 2
 if DEBUG:
     CELERY_TASK_ALWAYS_EAGER = True
     CELERY_TASK_EAGER_PROPAGATES = True
+
+GRAPHENE = {
+    "SCHEMA": "educational.schema.schema",
+}
